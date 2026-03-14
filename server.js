@@ -3,23 +3,23 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-// Allow Shopify domain
+// Shopify domain
 app.use(cors({
   origin: 'https://dolphin-store-20230509.myshopify.com'
 }));
 app.use(express.json());
+
+// Your credentials
+const username = 'client_hy4kcyqls6xp';
+const password = 'Zde02cfBnYsIwsgddlk6jiiYxMxO0Cw0';
+const authHeader = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
 
 app.post('/validate', async (req, res) => {
   try {
     const address = req.body.address?.trim();
     if (!address) return res.status(400).json({ error: "Address missing" });
 
-    // Body exactly like your working curl
-    const bodyToSend = {
-      address,
-      service_use: "Home"
-    };
-
+    const bodyToSend = { address, service_use: "Home" };
     console.log("Sending to Dolphin API:", JSON.stringify(bodyToSend));
 
     const response = await fetch(
@@ -29,8 +29,7 @@ app.post('/validate', async (req, res) => {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          // Hardcoded Basic Auth from curl
-          'Authorization': 'Basic Y2xpZW50X29hMHVvODFrdW81ZDozYnQzR1Vvb3BxRzNuUDRRb2xNc3pBN2hFamxvamVEaA=='
+          'Authorization': authHeader
         },
         body: JSON.stringify(bodyToSend)
       }
@@ -39,8 +38,7 @@ app.post('/validate', async (req, res) => {
     const text = await response.text();
     console.log("Dolphin API raw response:", text);
 
-    // Pass exact response to Shopify
-    res.status(response.status).send(text);
+    res.status(response.status).send(text); // Pass exact response to Shopify
 
   } catch (err) {
     console.error("Proxy error:", err);
