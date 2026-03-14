@@ -15,25 +15,33 @@ app.post('/validate', async (req, res) => {
     const address = req.body.address;
     if(!address) return res.status(400).json({ error: "Address missing" });
 
-    const response = await fetch('https://dolphin-telecoms-coverage-map-api.lionafricadigital.com/api/external/coverage/validate', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': 'Basic Y2xpZW50X29hMHVvODFrdW81ZDozYnQzR1Vvb3BxRzNuUDRRb2xNc3pBN2hFamxvamVEaA=='
-      },
-      body: JSON.stringify({ address, service_use: "Home" })
-    });
+    const bodyToSend = { address, service_use: "Home" };
+    console.log("Sending to Dolphin API:", JSON.stringify(bodyToSend));
 
-   if (!response.ok) {
-  const text = await response.text();
-  return res.status(response.status).json({ error: text });
-}
-const data = await response.json();
-    console.log('API returned:', data);
-res.json(data);
+    const response = await fetch(
+      'https://dolphin-telecoms-coverage-map-api.lionafricadigital.com/api/external/coverage/validate', 
+      {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic Y2xpZW50X29hMHVvODFrdW81ZDozYnQzR1Vvb3BxRzNuUDRRb2xNc3pBN2hFamxvamVEaA=='
+        },
+        body: JSON.stringify(bodyToSend)
+      }
+    );
 
-  } catch (err) {
+    const text = await response.text();
+    console.log("Dolphin API raw response:", text);
+
+    if(!response.ok){
+      return res.status(response.status).json({ error: text });
+    }
+
+    const data = JSON.parse(text);
+    res.json(data);
+
+  } catch(err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
