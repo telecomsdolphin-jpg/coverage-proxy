@@ -29,6 +29,7 @@ app.post('/validate', async (req, res) => {
   return res.status(response.status).json({ error: text });
 }
 const data = await response.json();
+    console.log('API returned:', data);
 res.json(data);
 
   } catch (err) {
