@@ -1,3 +1,4 @@
+console.log("API_BASIC:", process.env.API_BASIC ? "SET" : "MISSING");
 const fetch = require('node-fetch');
 const express = require('express');
 const cors = require('cors');
