@@ -20,7 +20,7 @@ app.post('/validate', async (req, res) => {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': process.env.API_BASIC
+        'Authorization': process.env.Basic
       },
       body: JSON.stringify({ address, service_use: "Home" })
     });
