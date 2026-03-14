@@ -3,38 +3,38 @@ import fetch from "node-fetch";
 import cors from "cors";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use(cors()); // allow all origins
+app.use(cors());
 app.use(express.json());
 
-app.post("/validate-coverage", async (req, res) => {
-  const { address, service_use } = req.body;
+// Use environment variables for API credentials
+const API_USER = process.env.API_USER;
+const API_PASS = process.env.API_PASS;
 
-  if (!address) return res.status(400).json({ error: "Address required" });
+app.post("/validate", async (req, res) => {
+  const { address } = req.body;
+  if(!address) return res.status(400).json({error:"Address required"});
 
   try {
-    const response = await fetch(
-      "https://dolphin-telecoms-coverage-map-api.lionafricadigital.com/api/external/coverage/validate",
-      {
-        method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          "Authorization": "Basic Y2xpZW50X29hMHVvODFrdW81ZDozYnQzR1Vvb3BxRzNuUDRRb2xNc3pBN2hFamxvamVEaA=="
-        },
-        body: JSON.stringify({ address, service_use })
-      }
-    );
+    const authHeader = 'Basic ' + Buffer.from(`${API_USER}:${API_PASS}`).toString('base64');
+
+    const response = await fetch('https://dolphin-telecoms-coverage-map-api.lionafricadigital.com/api/external/coverage/validate', {
+      method: 'POST',
+      headers: {
+        'Accept':'application/json',
+        'Content-Type':'application/json',
+        'Authorization': authHeader
+      },
+      body: JSON.stringify({ address, service_use: "Home" })
+    });
 
     const data = await response.json();
     res.json(data);
+
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Proxy error" });
+    res.status(500).json({error:"Server error"});
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, ()=>console.log(`Server running on port ${PORT}`));
