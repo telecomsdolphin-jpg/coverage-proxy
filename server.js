@@ -3,11 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-// Allow Shopify domain
+// Allow only Shopify domain
 app.use(cors({ origin: 'https://dolphin-store-20230509.myshopify.com' }));
 app.use(express.json());
 
-// Your Dolphin credentials
+// Dolphin API credentials
 const username = 'client_hy4kcyqls6xp';
 const password = 'Zde02cfBnYsIwsgddlk6jiiYxMxO0Cw0';
 const authHeader = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
@@ -36,17 +36,16 @@ app.post('/validate', async (req, res) => {
     const text = await response.text();
     console.log("Dolphin API raw response:", text);
 
+    // Safe JSON parsing
     try {
       const data = JSON.parse(text);
-      return res.status(200).json(data); // always return 200 if API returns valid JSON
+      return res.status(200).json(data);
     } catch {
-      // If API response is not valid JSON, send raw text but still 200
       return res.status(200).send(text);
     }
 
   } catch (err) {
     console.error("Proxy error:", err);
-    // Never crash Shopify: return friendly JSON
     return res.status(200).json({ error: 'Could not validate coverage. Try again.' });
   }
 });
