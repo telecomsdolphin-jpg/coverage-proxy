@@ -3,7 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://dolphin-store-20230509.myshopify.com',
+  methods: ['GET','POST'],
+  allowedHeaders: ['Content-Type','Authorization']
+}));
 app.use(express.json());
 
 app.post('/validate', async (req, res) => {
