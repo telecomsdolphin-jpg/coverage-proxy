@@ -3,22 +3,20 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-// Shopify domain
-app.use(cors({
-  origin: 'https://dolphin-store-20230509.myshopify.com'
-}));
+// Allow Shopify domain
+app.use(cors({ origin: 'https://dolphin-store-20230509.myshopify.com' }));
 app.use(express.json());
 
-// Your credentials
+// Your Dolphin credentials
 const username = 'client_hy4kcyqls6xp';
 const password = 'Zde02cfBnYsIwsgddlk6jiiYxMxO0Cw0';
 const authHeader = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
 
 app.post('/validate', async (req, res) => {
-  try {
-    const address = req.body.address?.trim();
-    if (!address) return res.status(400).json({ error: "Address missing" });
+  const address = req.body.address?.trim();
+  if (!address) return res.status(400).json({ error: "Address missing" });
 
+  try {
     const bodyToSend = { address, service_use: "Home" };
     console.log("Sending to Dolphin API:", JSON.stringify(bodyToSend));
 
@@ -38,11 +36,18 @@ app.post('/validate', async (req, res) => {
     const text = await response.text();
     console.log("Dolphin API raw response:", text);
 
-    res.status(response.status).send(text); // Pass exact response to Shopify
+    try {
+      const data = JSON.parse(text);
+      return res.status(200).json(data); // always return 200 if API returns valid JSON
+    } catch {
+      // If API response is not valid JSON, send raw text but still 200
+      return res.status(200).send(text);
+    }
 
   } catch (err) {
     console.error("Proxy error:", err);
-    res.status(500).json({ error: 'Server error' });
+    // Never crash Shopify: return friendly JSON
+    return res.status(200).json({ error: 'Could not validate coverage. Try again.' });
   }
 });
 
