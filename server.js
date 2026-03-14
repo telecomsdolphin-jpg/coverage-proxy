@@ -31,6 +31,7 @@ app.post('/validate', async (req, res) => {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
+  console.log('Calling API with Authorization:', process.env.API_BASIC);
 });
 
 app.listen(process.env.PORT || 3000, () => console.log('Proxy running...'));
