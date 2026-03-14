@@ -24,8 +24,12 @@ app.post('/validate', async (req, res) => {
       body: JSON.stringify({ address, service_use: "Home" })
     });
 
-    const data = await response.json();
-    res.json(data);
+   if (!response.ok) {
+  const text = await response.text();
+  return res.status(response.status).json({ error: text });
+}
+const data = await response.json();
+res.json(data);
 
   } catch (err) {
     console.error(err);
