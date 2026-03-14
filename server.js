@@ -3,35 +3,38 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
+// Allow Shopify domain (ya sab ke liye *)
 app.use(cors({
-  origin: 'https://dolphin-store-20230509.myshopify.com',
-  methods: ['GET','POST'],
-  allowedHeaders: ['Content-Type','Authorization']
+  origin: '*'
 }));
+
 app.use(express.json());
 
 app.post('/validate', async (req, res) => {
   try {
     const address = req.body.address;
 
-    const response = await fetch('https://dolphin-telecoms-coverage-map-api.lionafricadigital.com/api/external/coverage/validate', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': process.env.API_BASIC // Ensure this is correct
-      },
-      body: JSON.stringify({ address, service_use: "Home" })
-    });
+    // Call client API
+    const response = await fetch(
+      'https://dolphin-telecoms-coverage-map-api.lionafricadigital.com/api/external/coverage/validate',
+      {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': process.env.API_BASIC // environment variable
+        },
+        body: JSON.stringify({ address, service_use: "Home" })
+      }
+    );
 
     const data = await response.json();
-    res.json(data);
-
+    res.json(data); // Shopify frontend ko return
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
-  console.log('Calling API with Authorization:', process.env.API_BASIC);
 });
 
+// Listen on Render port
 app.listen(process.env.PORT || 3000, () => console.log('Proxy running...'));
